@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>masiro | Multi-Color Converter</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Inter:wght@400;600&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+    <title>masiro | Color Lab - Professional Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #c9a96e; --bg: #0a0a0a; --card: #161616; }
+        :root { --accent: #c9a96e; --bg: #0a0a0a; --card: #161616; --text-label: #c9a96e; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; transition: background 0.5s ease; }
         
@@ -15,32 +15,42 @@
 
         main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; position: relative; }
         
-        /* 背面の巨大色プレビュー */
-        #bgPreview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.3; transition: background 0.3s; z-index: 1; }
+        #bgPreview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.25; transition: background 0.3s; z-index: 1; }
 
         .converter-card { 
             position: relative; z-index: 2; background: var(--card); border: 1px solid #333; 
-            padding: 40px; border-radius: 12px; width: 100%; max-width: 500px; 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            padding: 40px; border-radius: 12px; width: 100%; max-width: 600px; 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
         }
 
-        .input-group { margin-bottom: 25px; }
-        .input-label { font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: 600; }
+        .input-group { margin-bottom: 30px; }
+        
+        /* ラベルを大きく強調 */
+        .input-label { 
+            font-size: 18px; 
+            color: var(--text-label); 
+            margin-bottom: 12px; 
+            display: block; 
+            font-weight: 700; 
+            letter-spacing: 0.05em;
+        }
         
         input {
-            width: 100%; background: #000; border: 1px solid #333; padding: 15px; 
-            color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 24px; 
-            border-radius: 6px; outline: none; transition: border-color 0.3s;
+            width: 100%; background: #000; border: 1px solid #444; padding: 18px; 
+            color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 28px; 
+            border-radius: 8px; outline: none; transition: all 0.3s;
         }
-        input:focus { border-color: var(--accent); }
+        input:focus { border-color: var(--accent); background: #050505; box-shadow: 0 0 15px rgba(201, 169, 110, 0.2); }
 
         .current-swatch { 
-            width: 100%; height: 80px; border-radius: 6px; margin-bottom: 30px; 
-            border: 1px solid #444; box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+            width: 100%; height: 120px; border-radius: 8px; margin-bottom: 35px; 
+            border: 1px solid #555; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
         }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .notice { font-size: 10px; color: #666; margin-top: 20px; line-height: 1.6; text-align: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .notice { font-size: 11px; color: #666; margin-top: 25px; line-height: 1.6; text-align: center; }
+        
+        ::placeholder { color: #333; }
     </style>
 </head>
 <body>
@@ -55,23 +65,23 @@
         <div id="mainSwatch" class="current-swatch"></div>
 
         <div class="input-group">
-            <span class="input-label">JPMA Code (e.g., R25-70B)</span>
+            <span class="input-label">日塗工標準色</span>
             <input type="text" id="inJPMA" placeholder="R25-70B" spellcheck="false">
         </div>
 
         <div class="input-group">
-            <span class="input-label">Munsell Value</span>
+            <span class="input-label">マンセル値</span>
             <input type="text" id="inMunsell" placeholder="5Y 7/2" spellcheck="false">
         </div>
 
         <div class="grid">
             <div class="input-group">
-                <span class="input-label">Hex Code</span>
+                <span class="input-label">HEX CODE</span>
                 <input type="text" id="inHex" placeholder="#FFFFFF" maxlength="7" spellcheck="false">
             </div>
             <div class="input-group">
-                <span class="input-label">RGB Value</span>
-                <input type="text" id="inRGB" placeholder="255,255,255" spellcheck="false">
+                <span class="input-label">RGB VALUE</span>
+                <input type="text" id="inRGB" placeholder="255, 255, 255" spellcheck="false">
             </div>
         </div>
 
@@ -80,7 +90,7 @@
 </main>
 
 <script>
-    // 相互変換用データベース/定数
+    // 相互変換ロジック
     const HUE_MAP = {"02":"2.5R","05":"5R","07":"7.5R","09":"10R","12":"2.5YR","15":"5YR","17":"7.5YR","19":"10YR","22":"2.5Y","25":"5Y","27":"7.5Y","29":"10Y","32":"2.5GY","35":"5GY","37":"7.5GY","39":"10GY","42":"2.5G","45":"5G","47":"7.5G","49":"10G","52":"2.5BG","55":"5BG","57":"7.5BG","59":"10BG","62":"2.5B","65":"5B","67":"7.5B","69":"10B","72":"2.5PB","75":"5PB","77":"7.5PB","79":"10PB","82":"2.5P","85":"5P","87":"7.5P","89":"10P","92":"2.5RP","95":"5RP","97":"7.5RP","99":"10RP"};
     const SAT_MAP = {"A":0.5,"B":1,"C":1.5,"D":2,"F":3,"H":4,"L":6,"P":8,"T":10,"V":12,"W":13,"X":14};
 
@@ -93,13 +103,11 @@
     const swatch = document.getElementById('mainSwatch');
     const bgPreview = document.getElementById('bgPreview');
 
-    // HEXからRGBへ
     function hexToRgb(hex) {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
     }
 
-    // RGBからマンセル（簡易近似）
     function rgbToMunsell(r, g, b) {
         let r1 = r/255, g1 = g/255, b1 = b/255;
         let max = Math.max(r1, g1, b1), min = Math.min(r1, g1, b1), d = max - min;
@@ -118,19 +126,6 @@
         return (s < 0.05) ? `N ${V}` : `${(h*100%10).toFixed(1)}${hueName} ${V}/${C}`;
     }
 
-    // マンセルからRGB（非常に簡易的な近似）
-    function munsellToRgb(mStr) {
-        // 本来は巨大な変換表が必要だが、デモ用にHVCをHSL的に解釈
-        const match = mStr.match(/([\d.]+)?([A-Z]+)\s+([\d.]+)\/([\d.]+)/);
-        if(!match) return {r:127, g:127, b:127};
-        let hueName = match[2], v = parseFloat(match[3]), c = parseFloat(match[4]);
-        let l = v * 10;
-        let s = c * 7; 
-        // 簡易的にHSL変換へブリッジ（実際はもっと複雑）
-        return {r: Math.round(l*1.2), g: Math.round(l), b: Math.round(l*0.8)}; 
-    }
-
-    // UI更新
     function updateAll(triggerId, color) {
         const { r, g, b } = color;
         const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
@@ -140,7 +135,6 @@
         if (triggerId !== 'inRGB') inputs.rgb.value = `${r}, ${g}, ${b}`;
         if (triggerId !== 'inMunsell') inputs.munsell.value = munsell;
         
-        // JPMA推測
         if (triggerId !== 'inJPMA') {
             const h = munsell.match(/[A-Z]+/);
             const v = munsell.match(/\s([\d.]+)/);
@@ -156,7 +150,6 @@
         bgPreview.style.background = hex;
     }
 
-    // イベントリスナー
     inputs.hex.addEventListener('input', (e) => {
         const rgb = hexToRgb(e.target.value);
         if (rgb) updateAll('inHex', rgb);
@@ -167,8 +160,8 @@
         if (parts.length === 3) updateAll('inRGB', {r:parts[0], g:parts[1], b:parts[2]});
     });
 
-    // 初期化
-    updateAll('init', {r:201, g:169, b:110}); // Design Mashiro Gold
+    // 初期化 (Design Mashiro Gold)
+    updateAll('init', {r:201, g:169, b:110});
 </script>
 </body>
 </html>
