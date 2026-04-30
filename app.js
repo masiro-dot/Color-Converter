@@ -88,7 +88,7 @@ function convertFromHex() {
 
 
 // ==============================
-// 日本塗料 → 変換（完全一致）
+// 日塗工 → 変換（完全一致）
 // ==============================
 function convertFromJP() {
   const jp = document.getElementById("jp").value.trim();
@@ -138,8 +138,8 @@ function showResult(result, inputHex = null) {
       <div style="width:50px; height:50px; background:${hex}; margin-bottom:10px;"></div>
       <b>HEX:</b> ${hex}<br>
       <b>RGB:</b> ${result.rgb.join(", ")}<br>
-      <b>マンセル:</b> ${result.munsell}<br>
-      <b>日本塗料:</b> ${result.jp}
+      <b>マンセル値:</b> ${result.munsell}<br>
+      <b>日塗工:</b> ${result.jp}
     </div>
   `;
 }
