@@ -10,50 +10,26 @@ body {
   padding: 30px;
   background: #f5f5f5;
 }
-
 .container {
   max-width: 500px;
   margin: auto;
   background: #fff;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
-
-h2 {
-  text-align: center;
-}
-
 input {
   width: 100%;
   padding: 10px;
-  font-size: 16px;
   margin-top: 10px;
-  box-sizing: border-box;
 }
-
 button {
   width: 100%;
-  padding: 12px;
-  margin-top: 15px;
-  font-size: 16px;
-  background: #333;
-  color: #fff;
-  border: none;
-  cursor: pointer;
+  padding: 10px;
+  margin-top: 10px;
 }
-
-button:hover {
-  background: #555;
-}
-
 .result {
   margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
 }
-
 .color-box {
   width: 60px;
   height: 60px;
@@ -63,25 +39,31 @@ button:hover {
 </style>
 
 </head>
-
 <body>
 
 <div class="container">
 
-  <h2>カラー変換ツール</h2>
+<h2>カラー変換ツール</h2>
 
-  <!-- HEX入力 -->
-  <label>HEXカラー</label>
-  <input id="hex" placeholder="#C87850">
+<!-- HEX -->
+<label>HEXカラー</label>
+<input id="hex" placeholder="#C87850">
+<button onclick="convertFromHex()">HEXから変換</button>
 
-  <button onclick="convertColor()">変換</button>
+<!-- 日本塗料 -->
+<label>日本塗料（例: 22-90D）</label>
+<input id="jp" placeholder="22-90D">
+<button onclick="convertFromJP()">日本塗料から変換</button>
 
-  <!-- 結果 -->
-  <div id="result" class="result"></div>
+<!-- マンセル -->
+<label>マンセル（例: 2.5Y9/2）</label>
+<input id="munsell" placeholder="2.5Y9/2">
+<button onclick="convertFromMunsell()">マンセルから変換</button>
+
+<div id="result" class="result"></div>
 
 </div>
 
-<!-- JS読み込み -->
 <script src="app.js"></script>
 
 </body>
