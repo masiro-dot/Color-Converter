@@ -1,146 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>masiro | Color Lab Mobile</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Inter:wght@600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
-    <style>
-        :root { --accent: #c9a96e; --bg: #0a0a0a; --card: #161616; --text-label: #c9a96e; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        /* iPhone XRの高さに配慮し、全体を詰める */
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-        
-        header { padding: 12px 20px; border-bottom: 1px solid #222; background: rgba(0,0,0,0.8); }
-        .logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--accent); letter-spacing: 0.1em; }
-
-        main { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 15px; position: relative; }
-        
-        #bgPreview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.2; transition: background 0.3s; z-index: 1; }
-
-        .converter-card { 
-            position: relative; z-index: 2; background: var(--card); border: 1px solid #333; 
-            padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        }
-
-        /* 隙間を全体的にタイトに */
-        .input-group { margin-bottom: 18px; }
-        
-        .input-label { 
-            font-size: 14px; 
-            color: var(--text-label); 
-            margin-bottom: 6px; 
-            display: block; 
-            font-weight: 700; 
-        }
-        
-        input {
-            width: 100%; background: #000; border: 1px solid #444; padding: 12px; 
-            color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 22px; 
-            border-radius: 6px; outline: none; transition: all 0.3s;
-            -webkit-appearance: none; /* iOS特有の影を消す */
-        }
-        input:focus { border-color: var(--accent); }
-
-        .current-swatch { 
-            width: 100%; height: 60px; border-radius: 6px; margin-bottom: 20px; 
-            border: 1px solid #555;
-        }
-
-        /* スマホで縦並びにするためのレスポンシブ設定 */
-        .grid { display: flex; flex-direction: column; gap: 0; }
-        
-        .notice { font-size: 10px; color: #555; margin-top: 15px; line-height: 1.4; text-align: center; }
-        
-        /* PC（幅広画面）の時だけ横並びに戻す */
-        @media (min-width: 600px) {
-            .grid { flex-direction: row; gap: 20px; }
-            .grid .input-group { flex: 1; }
-            .current-swatch { height: 100px; }
-            .converter-card { padding: 40px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Color Converter</title>
 </head>
 <body>
 
-<header>
-    <div class="logo">masiro <span>Color Lab</span></div>
-</header>
+<h2>カラー変換ツール</h2>
 
-<main>
-    <div id="bgPreview"></div>
-    <div class="converter-card">
-        <div id="mainSwatch" class="current-swatch"></div>
+<input id="hex" placeholder="#C87850">
+<button onclick="convertColor()">変換</button>
 
-        <div class="input-group">
-            <span class="input-label">日塗工標準色</span>
-            <input type="text" id="inJPMA" placeholder="R25-70B" spellcheck="false">
-        </div>
+<div id="result" style="margin-top:20px;"></div>
 
-        <div class="input-group">
-            <span class="input-label">マンセル値</span>
-            <input type="text" id="inMunsell" placeholder="5Y 7/2" spellcheck="false">
-        </div>
+<script src="app.js"></script>
 
-        <div class="grid">
-            <div class="input-group">
-                <span class="input-label">HEX CODE</span>
-                <input type="text" id="inHex" placeholder="#FFFFFF" maxlength="7" spellcheck="false">
-            </div>
-            <div class="input-group">
-                <span class="input-label">RGB VALUE</span>
-                <input type="text" id="inRGB" placeholder="255, 255, 255" spellcheck="false">
-            </div>
-        </div>
-
-        <p class="notice">※計算による近似値です。最終決定は必ず見本帳で。</p>
-    </div>
-</main>
-
-<script>
-    // --- JavaScriptロジックは変更なし ---
-    const HUE_MAP = {"02":"2.5R","05":"5R","07":"7.5R","09":"10R","12":"2.5YR","15":"5YR","17":"7.5YR","19":"10YR","22":"2.5Y","25":"5Y","27":"7.5Y","29":"10Y","32":"2.5GY","35":"5GY","37":"7.5GY","39":"10GY","42":"2.5G","45":"5G","47":"7.5G","49":"10G","52":"2.5BG","55":"5BG","57":"7.5BG","59":"10BG","62":"2.5B","65":"5B","67":"7.5B","69":"10B","72":"2.5PB","75":"5PB","77":"7.5PB","79":"10PB","82":"2.5P","85":"5P","87":"7.5P","89":"10P","92":"2.5RP","95":"5RP","97":"7.5RP","99":"10RP"};
-    const SAT_MAP = {"A":0.5,"B":1,"C":1.5,"D":2,"F":3,"H":4,"L":6,"P":8,"T":10,"V":12,"W":13,"X":14};
-    const inputs = { jpma: document.getElementById('inJPMA'), munsell: document.getElementById('inMunsell'), hex: document.getElementById('inHex'), rgb: document.getElementById('inRGB') };
-    const swatch = document.getElementById('mainSwatch');
-    const bgPreview = document.getElementById('bgPreview');
-
-    function hexToRgb(hex) {
-        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
-    }
-    function rgbToMunsell(r, g, b) {
-        let r1 = r/255, g1 = g/255, b1 = b/255;
-        let max = Math.max(r1, g1, b1), min = Math.min(r1, g1, b1), d = max - min;
-        let h, v = max, s = max === 0 ? 0 : d / max;
-        if (max === min) h = 0; else { if (max === r1) h = (g1-b1)/d + (g1<b1?6:0); else if (max === g1) h = (b1-r1)/d + 2; else h = (r1-g1)/d + 4; h /= 6; }
-        const hues = ["R","YR","Y","GY","G","BG","B","PB","P","RP"];
-        let hueName = hues[Math.floor(h*10)%10];
-        let V = (v * 10).toFixed(1), C = (s * 14).toFixed(1);
-        return (s < 0.05) ? `N ${V}` : `${(h*100%10).toFixed(1)}${hueName} ${V}/${C}`;
-    }
-    function updateAll(triggerId, color) {
-        const { r, g, b } = color;
-        const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
-        const munsell = rgbToMunsell(r, g, b);
-        if (triggerId !== 'inHex') inputs.hex.value = hex;
-        if (triggerId !== 'inRGB') inputs.rgb.value = `${r}, ${g}, ${b}`;
-        if (triggerId !== 'inMunsell') inputs.munsell.value = munsell;
-        if (triggerId !== 'inJPMA') {
-            const h = munsell.match(/[A-Z]+/); const v = munsell.match(/\s([\d.]+)/); const c = munsell.match(/\/([\d.]+)/);
-            if(h && v && c) {
-                const hueKey = Object.keys(HUE_MAP).find(key => HUE_MAP[key].includes(h[0])) || "25";
-                const satKey = Object.keys(SAT_MAP).find(key => SAT_MAP[key] >= parseFloat(c[1])) || "B";
-                inputs.jpma.value = `R${hueKey}-${Math.round(parseFloat(v[1])*10)}${satKey}`;
-            }
-        }
-        swatch.style.background = hex; bgPreview.style.background = hex;
-    }
-    inputs.hex.addEventListener('input', (e) => { const rgb = hexToRgb(e.target.value); if (rgb) updateAll('inHex', rgb); });
-    inputs.rgb.addEventListener('input', (e) => { const parts = e.target.value.split(',').map(Number); if (parts.length === 3) updateAll('inRGB', {r:parts[0], g:parts[1], b:parts[2]}); });
-    updateAll('init', {r:201, g:169, b:110});
-</script>
 </body>
 </html>
