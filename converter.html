@@ -1,70 +1,161 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>カラー変換ツール</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Color Converter</title>
+    <style>
+        /* 既存ツールと共通のダークモード・ベーススタイル */
+        :root {
+            --bg-glass: rgba(0, 0, 0, 0.75);
+            --border-glass: rgba(255, 255, 255, 0.2);
+            --accent: #ffffff;
+        }
 
-<style>
-body {
-  font-family: sans-serif;
-  padding: 30px;
-  background: #f5f5f5;
-}
-.container {
-  max-width: 500px;
-  margin: auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-}
-input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-}
-button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-}
-.result {
-  margin-top: 20px;
-}
-.color-box {
-  width: 60px;
-  height: 60px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-}
-</style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100dvh;
+        }
 
+        /* GUIパネル：既存のツール群とデザインを統一 */
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: var(--border-glass);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 300;
+            margin: 0 0 20px 0;
+            text-align: center;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+            margin-left: 5px;
+        }
+
+        /* iPhone XRでの入力しやすさを考慮 */
+        input {
+            width: 100%;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            color: #ffffff;
+            padding: 0 12px;
+            font-size: 16px; /* iOSでのズーム防止 */
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        button {
+            width: 100%;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: background 0.3s;
+        }
+
+        button:active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 結果表示エリア */
+        #result {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .result-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .color-box {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .info-list {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-list b {
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 400;
+            margin-right: 5px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <h2>COLOR CONVERTER</h2>
 
-<h2>カラー変換ツール</h2>
+    <div class="input-group">
+        <label>HEX</label>
+        <input type="text" id="hex" placeholder="#C87850">
+        <button onclick="convertFromHex()">CONVERT FROM HEX</button>
+    </div>
 
-<!-- HEX -->
-<label>HEXカラー</label>
-<input id="hex" placeholder="#C87850">
-<button onclick="convertFromHex()">HEXから変換</button>
+    <div class="input-group">
+        <label>JPMA (e.g. 22-90D)</label>
+        <input type="text" id="jp" placeholder="22-90D">
+        <button onclick="convertFromJP()">CONVERT FROM JPMA</button>
+    </div>
 
-<!-- 日本塗料 -->
-<label>日本塗料（例: 22-90D）</label>
-<input id="jp" placeholder="22-90D">
-<button onclick="convertFromJP()">日本塗料から変換</button>
+    <div class="input-group">
+        <label>MUNSELL</label>
+        <input type="text" id="munsell" placeholder="5YR 7/8">
+        <button onclick="convertFromMunsell()">CONVERT FROM MUNSELL</button>
+    </div>
 
-<!-- マンセル -->
-<label>マンセル（例: 2.5Y9/2）</label>
-<input id="munsell" placeholder="2.5Y9/2">
-<button onclick="convertFromMunsell()">マンセルから変換</button>
-
-<div id="result" class="result"></div>
-
+    <div id="result">
+        </div>
 </div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
